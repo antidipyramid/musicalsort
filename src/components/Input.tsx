@@ -1,24 +1,31 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
+import {useState} from 'react';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 import Slider from 'react-rangeslider';
+import 'react-rangeslider/lib/index.css';
 
 function SortOptionsPanel() {}
 export {SortOptionsPanel};
 
-function SoundOptions() {
-  return (
-    <div>
-      <Row>
-        {'Speed: '}
-        <Slider value={0} orientation='horizontal' />
-        {'Number of items: '}
-        <Slider value={0} orientation='horizontal' />
-      </Row>
-    </div>
-  );
-}
-export {SoundOptions};
+// function SoundOptions() {
+//   return (
+//     <div>
+//       <Row>
+//         <Col>
+//           {'Speed:'}
+//           <SoundSlider className='ml-3' />
+//         </Col>
+//         <Col>
+//           {'Number of items: '}
+//           <Slider value={0} orientation='horizontal' />
+//         </Col>
+//       </Row>
+//     </div>
+//   );
+// }
+// export {SoundOptions};
 
 function AlgorithmOptions(props: {className: string; handleClick: Function}) {
   return (

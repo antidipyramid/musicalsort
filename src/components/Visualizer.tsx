@@ -1,13 +1,14 @@
 import React from 'react';
-import {useState, useEffect, useRef, useReducer} from 'react';
-import {Container, SVG} from '@svgdotjs/svg.js';
-import {insertionSort} from '../utils/Sorters';
 import {
-  SampleOptions,
-  AlgorithmOptions,
-  SoundOptions,
-  SortOptionButton,
-} from './Input';
+  useState,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  MutableRefObject,
+} from 'react';
+import {insertionSort} from '../utils/Sorters';
+import {Graphic} from './Graphic';
+import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
 
 interface Block {
   value: number;
@@ -15,9 +16,22 @@ interface Block {
 }
 export type {Block};
 
-function generateNewArray(): Array<Block> {
+interface StateRef {
+  speed: MutableRefObject<number>;
+  sortStatus: MutableRefObject<string>;
+}
+export type {StateRef};
+
+interface StateUpdaters {
+  updateSpeed: Function;
+  updateSortStatus: Function;
+  updateArray: Function;
+}
+export type {StateUpdaters};
+
+function generateNewArray(size: number): Array<Block> {
   let list: Array<Block> = [];
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < size; i++) {
     list.push({value: Math.random() * 400 + 1, state: 'unsorted'});
   }
   return list;
@@ -33,53 +47,64 @@ function getSorterFromName(name: string) {
 }
 
 function Visualizer() {
-  const [array, setArray] = useState(generateNewArray());
+  const [array, setArray] = useState(generateNewArray(25));
+  const [size, setSize] = useState(25);
+  const [sortStatus, setSortStatus] = useState('idle');
 
-  const svgObject = useRef<Container | null>(null);
-  const svg = useRef<HTMLDivElement>(null);
+  const [speed, setSpeed] = useState(10);
 
-  useEffect(() => {
-    if (svgObject.current == null) {
-      if (svg.current != null) {
-        svgObject.current = SVG().addTo('#graphic').size(1000, 500);
-      }
-    } else {
-      svgObject.current.clear();
-    }
+  const speedRef = useRef(10);
+  const sortStatusRef = useRef('idle');
 
-    const colorMap = new Map<string, string>([
-      ['sorted', 'blue'],
-      ['considering', 'yellow'],
-      ['unsorted', 'red'],
-    ]);
-
-    array.forEach((element, i) => {
-      let [height, blockStatus] = [element.value, element.state];
-      if (svgObject.current != null) {
-        svgObject.current
-          .rect(10, height)
-          .attr({fill: colorMap.get(blockStatus)})
-          .move(15 * i, 0);
-      }
-    });
-  });
+  const handleSliderChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    updater: Function
+  ) => {
+    updater(Number(e.target.value));
+    speedRef.current = speed;
+  };
 
   const sortArray = (algorithmName: string) => {
     let sorter = getSorterFromName(algorithmName);
-    sorter(array.slice(), setArray);
+    sorter(array.slice());
+  };
+
+  const reset = () => {
+    setSortStatus('idle');
+    setArray(generateNewArray(size));
   };
 
   return (
     <div id='visualizer'>
-      <SoundOptions />
+      {/* <SoundOptions /> */}
       {/* <SampleOptions className='mb-3' handleClick={setSortAlgorithm} /> */}
+      {'Speed: '}
+      <input
+        className={'w-100 ml-3'}
+        type='range'
+        value={speed}
+        step={1}
+        min={10}
+        max={500}
+        onChange={(e) => handleSliderChange(e, setSpeed)}
+      />
+      {'Size of array: '}
+      <input
+        className={'w-100 ml-3'}
+        type='range'
+        value={size}
+        step={1}
+        min={5}
+        max={50}
+        onChange={(e) => handleSliderChange(e, setSize)}
+      />
       <AlgorithmOptions className='d-flex mb-3' handleClick={sortArray} />
       <SortOptionButton
         className='mb-3'
         text='Make New Array'
-        handleClick={() => setArray(generateNewArray())}
+        handleClick={reset}
       />
-      <div id='graphic' ref={svg} />
+      <Graphic array={array} />
     </div>
   );
 }
