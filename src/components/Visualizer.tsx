@@ -1,15 +1,8 @@
 import React from 'react';
-import {
-  Dispatch,
-  useState,
-  useEffect,
-  useReducer,
-  useRef,
-  ChangeEvent,
-  MutableRefObject,
-} from 'react';
+import {useState, useEffect, useRef, ChangeEvent} from 'react';
 import {insertionSort, mergeSort} from '../utils/Sorters';
 import {BubbleSortState, bubbleSort} from '../utils/BubbleSort';
+import quickSort, {QuickSortState} from '../utils/Quicksort';
 import {Graphic} from './Graphic';
 import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
 
@@ -43,24 +36,18 @@ type SorterStates = {
     swappedOnCurrentPass: boolean;
     done: boolean;
   };
+  Quicksort: QuickSortState;
 };
 
-type SorterState = InsertionSortState | MergeSortState | BubbleSortState;
-
-// type SorterName = 'Insertion Sort' | 'Merge Sort';
+type SorterState =
+  | InsertionSortState
+  | MergeSortState
+  | BubbleSortState
+  | QuickSortState;
 
 type Action =
   | {type: 'update'; name: string; newState: SorterState}
   | {type: 'reset'};
-
-// type InsertionSort = (
-//   a: Block[],
-//   state: InsertionSortState
-// ) => {array: Block[]; state: InsertionSortState};
-// type MergeSort = (
-//   a: Block[],
-//   state: MergeSortState
-// ) => {array: Block[]; state: MergeSortState};
 
 function generateNewArray(size: number): Array<Block> {
   let list: Array<Block> = [];
@@ -70,26 +57,26 @@ function generateNewArray(size: number): Array<Block> {
   return list;
 }
 
-function getSorterFromName(
-  name: string
-):
-  | ((
-      a: Block[],
-      state: InsertionSortState
-    ) => {array: Block[]; state: InsertionSortState})
-  | ((
-      a: Block[],
-      state: MergeSortState
-    ) => {array: Block[]; state: MergeSortState}) {
-  switch (name) {
-    case 'Insertion Sort':
-      return insertionSort;
-    case 'Merge Sort':
-      return mergeSort;
-    default:
-      return insertionSort;
-  }
-}
+// function getSorterFromName(
+//   name: string
+// ):
+//   | ((
+//       a: Block[],
+//       state: InsertionSortState
+//     ) => {array: Block[]; state: InsertionSortState})
+//   | ((
+//       a: Block[],
+//       state: MergeSortState
+//     ) => {array: Block[]; state: MergeSortState}) {
+//   switch (name) {
+//     case 'Insertion Sort':
+//       return insertionSort;
+//     case 'Merge Sort':
+//       return mergeSort;
+//     default:
+//       return insertionSort;
+//   }
+// }
 
 const initialSorterStates: SorterStates = {
   'Insertion Sort': {curr: 0, next: 1, done: false},
@@ -101,6 +88,16 @@ const initialSorterStates: SorterStates = {
     swappedOnCurrentPass: false,
     done: false,
   },
+  Quicksort: {
+    partitioning: true,
+    curr: 0,
+    pivot: -1,
+    high: -1,
+    low: 0,
+    lowBound: 0,
+    stack: [],
+    done: false,
+  },
 };
 
 function resetSorterStates() {
@@ -108,6 +105,7 @@ function resetSorterStates() {
     'Insertion Sort': {...initialSorterStates['Insertion Sort']},
     'Merge Sort': {...initialSorterStates['Merge Sort']},
     'Bubble Sort': {...initialSorterStates['Bubble Sort']},
+    Quicksort: {...initialSorterStates['Quicksort']},
   };
 }
 
@@ -135,15 +133,7 @@ function Visualizer() {
   const [speed, setSpeed] = useState(10);
   const [currentSorter, setSorter] = useState('Insertion Sort');
 
-  // const [sortStates, sortStatesDispatch] = useReducer(
-  //   reducer,
-  //   initialSorterStates
-  // );
-
   const speedRef = useRef(10);
-  // const sorterStateRef = useRef<InsertionSortState | MergeSortState | null>(
-  //   null
-  // );
   const sorterIntervalRef = useRef<NodeJS.Timeout>();
 
   const handleSliderChange = (
@@ -161,16 +151,15 @@ function Visualizer() {
 
   const sorterStateRef = useRef({...initialSorterStates});
 
-  // const sortArray = (algorithmName: SorterName) => {
-  //   if (sorterIntervalRef.current != null) {
-  //     return;
-  //   }
-
-  //   // let sorter = getSorterFromName(algorithmName);
-  //   // let sorterState: SorterState = sortStates[algorithmName];
-
-  //   console.log(array);
-  // };
+  const resetAllAfterSort = () => {
+    if (sorterIntervalRef.current) {
+      clearInterval(sorterIntervalRef.current);
+      setUserClickedSort(false);
+      // sortStatesDispatch({type: 'reset'});
+      sorterStateRef.current = resetSorterStates();
+      console.log(array);
+    }
+  };
 
   useEffect(() => {
     sorterIntervalRef.current = setInterval(() => {
@@ -184,6 +173,19 @@ function Visualizer() {
       } else if (currentSorter === 'Bubble Sort') {
         resp = bubbleSort(array.slice(), sorterStateRef.current['Bubble Sort']);
         sorterStateRef.current['Bubble Sort'] = {...resp.state};
+      } else if (currentSorter === 'Quicksort') {
+        if (sorterStateRef.current['Quicksort'].high === -1) {
+          resp = quickSort(array.slice(), {
+            ...sorterStateRef.current['Quicksort'],
+            high: array.length - 1,
+          });
+        } else {
+          resp = quickSort(array.slice(), sorterStateRef.current['Quicksort']);
+        }
+        sorterStateRef.current['Quicksort'] = {
+          ...resp.state,
+          stack: [...resp.state.stack],
+        };
       } else {
         resp = mergeSort(array.slice(), sorterStateRef.current['Merge Sort']);
         sorterStateRef.current['Merge Sort'] = {
@@ -192,25 +194,12 @@ function Visualizer() {
         console.log(sorterStateRef.current['Merge Sort']);
       }
 
-      // console.log(sortStates[algorithmName]);
       console.log(resp.state);
-      // let resp = sorter(array.slice(), sorterState);
       setArray(resp.array);
-      // sortStatesDispatch({
-      //   type: 'update',
-      //   name: currentSorter,
-      //   newState: resp.state,
-      // });
-      // console.log(sortStates['Merge Sort']);
+      console.log(resp.array.map((x) => x.value));
 
       if (resp.state.done) {
-        if (sorterIntervalRef.current) {
-          clearInterval(sorterIntervalRef.current);
-          setUserClickedSort(false);
-          // sortStatesDispatch({type: 'reset'});
-          sorterStateRef.current = resetSorterStates();
-          console.log(array);
-        }
+        resetAllAfterSort();
       }
       // sorterStateRef.current = resp.state;
     }, speedRef.current);
@@ -254,7 +243,7 @@ function Visualizer() {
         value={size}
         step={1}
         min={5}
-        max={50}
+        max={100}
         onChange={(e) => handleSliderChange(e, setSize)}
       />
       <AlgorithmOptions

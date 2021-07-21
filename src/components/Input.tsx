@@ -41,7 +41,7 @@ function AlgorithmOptions(props: {className: string; handleClick: Function}) {
         handleClick={props.handleClick}
       />
       <SortOptionButton
-        text='Radix Sort'
+        text='Quicksort'
         className='mr-3 w-100'
         handleClick={props.handleClick}
       />

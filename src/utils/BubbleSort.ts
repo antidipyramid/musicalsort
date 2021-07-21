@@ -1,13 +1,12 @@
 import type {Block} from '../components/Visualizer';
 
-interface BubbleSortState {
+export interface BubbleSortState {
   curr: number;
   prev: number;
   swappedOnPrevPass: boolean;
   swappedOnCurrentPass: boolean;
   done: boolean;
 }
-export type {BubbleSortState};
 
 function bubbleSort(a: Block[], state: BubbleSortState) {
   // go back to the beginning if we've passed the end

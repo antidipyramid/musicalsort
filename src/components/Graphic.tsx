@@ -25,9 +25,9 @@ function Graphic(props: {array: Array<Block>}) {
       let [height, blockStatus] = [element.value, element.state];
       if (svgObject.current != null) {
         svgObject.current
-          .rect(10, height)
+          .rect(5, height)
           .attr({fill: colorMap.get(blockStatus)})
-          .move(15 * i, 0);
+          .move(7 * i, 0);
       }
     });
   });
