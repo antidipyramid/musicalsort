@@ -63,7 +63,7 @@ type Action =
 function generateNewArray(size: number): Array<Block> {
   let list: Array<Block> = [];
   for (let i = 0; i < size; i++) {
-    list.push({value: Math.random() * 400 + 1, state: 'unsorted'});
+    list.push({value: Math.random() * 300 + 1, state: 'unsorted'});
   }
   return list;
 }
@@ -222,9 +222,9 @@ function Visualizer() {
         console.log(sorterStateRef.current['Merge Sort']);
       }
 
-      console.log(resp.state);
+      // console.log(resp.state);
       setArray(resp.array);
-      console.log(resp.array.map((x) => x.value));
+      // console.log(resp.array.map((x) => x.value));
 
       if (resp.state.done) {
         resetAllAfterSort();

@@ -17,13 +17,14 @@ function Graphic(props: {array: Array<Block>}) {
   const svgObject = useRef<Container | null>(null);
   const svg = useRef<HTMLDivElement>(null);
 
-  let [svgWidth, svgHeight, offset] = [800, 500, 5];
+  let [svgWidth, svgHeight, offset] = [800, 300, 5];
   let blockWidth =
     (svgWidth - props.array.length * offset) / props.array.length;
   useEffect(() => {
     if (svgObject.current == null) {
       if (svg.current != null) {
         svgObject.current = SVG().addTo('#graphic').size(svgWidth, svgHeight);
+        svgObject.current.css('transform', 'scale(1,-1)');
       }
     } else {
       svgObject.current.clear();
