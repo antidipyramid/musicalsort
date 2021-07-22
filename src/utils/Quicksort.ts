@@ -4,6 +4,7 @@ import type {Block} from '../components/Visualizer';
 export interface QuickSortState {
   partitioning: boolean;
   curr: number;
+  prev: number;
   pivot: number;
   high: number;
   low: number;
@@ -28,15 +29,34 @@ function partition(a: Block[], state: any) {
         ...state,
         stack: [...state.stack],
         pivot: state.high,
+        prev: state.low,
         curr: state.low,
         lowBound: state.low - 1,
       },
     };
   }
 
+  a[state.pivot].state = 'pivot';
+
+  if (state.prev > state.lowBound) {
+    a[state.prev].state = 'presorted high';
+  }
+  // a[state.prev].state = 'presorted high';
+  if (state.curr !== state.pivot) {
+    a[state.curr].state = 'considering';
+  }
+
   if (state.curr >= state.high) {
     //we've reached our pivot, swap and we're done
     swap(a, state.high, state.lowBound + 1);
+    a[state.lowBound + 1].state = 'sorted';
+
+    if (state.lowBound + 1 != state.high) {
+      a[state.high].state = 'presorted high';
+    } else {
+      a[state.high].state = 'presorted low';
+    }
+
     return {
       array: a,
       state: {
@@ -50,12 +70,14 @@ function partition(a: Block[], state: any) {
 
   if (a[state.curr].value <= a[state.pivot].value) {
     swap(a, state.curr, state.lowBound + 1);
+    a[state.lowBound + 1].state = 'presorted low';
     return {
       array: a,
       state: {
         ...state,
         stack: [...state.stack],
         lowBound: state.lowBound + 1,
+        prev: state.curr,
         curr: state.curr + 1,
       },
     };
@@ -66,6 +88,7 @@ function partition(a: Block[], state: any) {
     state: {
       ...state,
       stack: [...state.stack],
+      prev: state.curr,
       curr: state.curr + 1,
     },
   };
@@ -76,13 +99,23 @@ function quickSort(a: Block[], state: any) {
     return partition(a, state);
   }
 
+  a.slice(state.low, state.high + 1).forEach((x, i) =>
+    i + state.low !== state.pivot
+      ? (x.state = 'presorted')
+      : (x.state = 'sorted')
+  );
+
   let stackAddition = [];
-  if (state.pivot > state.low) {
+  if (state.pivot > state.low + 1) {
     stackAddition.push(state.low, state.pivot - 1);
+  } else {
+    a[state.low].state = 'sorted';
   }
 
-  if (state.pivot < state.high) {
+  if (state.pivot < state.high - 1) {
     stackAddition.push(state.pivot + 1, state.high);
+  } else {
+    a[state.high].state = 'sorted';
   }
 
   if (state.stack.length + stackAddition.length < 1) {

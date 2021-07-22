@@ -6,16 +6,24 @@ const colorMap = new Map<string, string>([
   ['sorted', 'blue'],
   ['considering', 'yellow'],
   ['unsorted', 'red'],
+  ['minimum', 'green'],
+  ['pivot', 'black'],
+  ['presorted', 'steelblue'],
+  ['presorted low', 'cyan'],
+  ['presorted high', 'hotpink'],
 ]);
 
 function Graphic(props: {array: Array<Block>}) {
   const svgObject = useRef<Container | null>(null);
   const svg = useRef<HTMLDivElement>(null);
 
+  let [svgWidth, svgHeight, offset] = [800, 500, 5];
+  let blockWidth =
+    (svgWidth - props.array.length * offset) / props.array.length;
   useEffect(() => {
     if (svgObject.current == null) {
       if (svg.current != null) {
-        svgObject.current = SVG().addTo('#graphic').size(1000, 500);
+        svgObject.current = SVG().addTo('#graphic').size(svgWidth, svgHeight);
       }
     } else {
       svgObject.current.clear();
@@ -25,9 +33,9 @@ function Graphic(props: {array: Array<Block>}) {
       let [height, blockStatus] = [element.value, element.state];
       if (svgObject.current != null) {
         svgObject.current
-          .rect(5, height)
+          .rect(blockWidth, height)
           .attr({fill: colorMap.get(blockStatus)})
-          .move(7 * i, 0);
+          .move((blockWidth + offset) * i, 0);
       }
     });
   });

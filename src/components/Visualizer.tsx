@@ -3,12 +3,21 @@ import {useState, useEffect, useRef, ChangeEvent} from 'react';
 import {insertionSort, mergeSort} from '../utils/Sorters';
 import {BubbleSortState, bubbleSort} from '../utils/BubbleSort';
 import quickSort, {QuickSortState} from '../utils/Quicksort';
+import selectionSort, {SelectionSortState} from '../utils/SelectionSort';
 import {Graphic} from './Graphic';
 import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
 
 interface Block {
   value: number;
-  state: 'unsorted' | 'sorted' | 'considering';
+  state:
+    | 'unsorted'
+    | 'sorted'
+    | 'considering'
+    | 'minimum'
+    | 'pivot'
+    | 'presorted'
+    | 'presorted low'
+    | 'presorted high';
 }
 export type {Block};
 
@@ -37,13 +46,15 @@ type SorterStates = {
     done: boolean;
   };
   Quicksort: QuickSortState;
+  'Selection Sort': SelectionSortState;
 };
 
 type SorterState =
   | InsertionSortState
   | MergeSortState
   | BubbleSortState
-  | QuickSortState;
+  | QuickSortState
+  | SelectionSortState;
 
 type Action =
   | {type: 'update'; name: string; newState: SorterState}
@@ -90,12 +101,21 @@ const initialSorterStates: SorterStates = {
   },
   Quicksort: {
     partitioning: true,
+    prev: 0,
     curr: 0,
     pivot: -1,
     high: -1,
     low: 0,
     lowBound: 0,
     stack: [],
+    done: false,
+  },
+  'Selection Sort': {
+    curr: 1,
+    prev: 0,
+    sortedIndex: -1,
+    minValue: Number.MAX_SAFE_INTEGER,
+    minIndex: -1,
     done: false,
   },
 };
@@ -106,6 +126,7 @@ function resetSorterStates() {
     'Merge Sort': {...initialSorterStates['Merge Sort']},
     'Bubble Sort': {...initialSorterStates['Bubble Sort']},
     Quicksort: {...initialSorterStates['Quicksort']},
+    'Selection Sort': {...initialSorterStates['Selection Sort']},
   };
 }
 
@@ -115,7 +136,8 @@ function resetSorterStates() {
 //       // console.log(state[action.name]);
 //       console.log({...state, [action.name]: action.newState});
 //       return {...state, [action.name]: {...action.newState}};
-//     case 'reset':
+//     case 'reset'
+//
 //       return {
 //         'Insertion Sort': {curr: 0, next: 1, done: false},
 //         'Merge Sort': {width: 1, left: 0, done: false},
@@ -186,6 +208,12 @@ function Visualizer() {
           ...resp.state,
           stack: [...resp.state.stack],
         };
+      } else if (currentSorter === 'Selection Sort') {
+        resp = selectionSort(
+          array.slice(),
+          sorterStateRef.current['Selection Sort']
+        );
+        sorterStateRef.current['Selection Sort'] = {...resp.state};
       } else {
         resp = mergeSort(array.slice(), sorterStateRef.current['Merge Sort']);
         sorterStateRef.current['Merge Sort'] = {
