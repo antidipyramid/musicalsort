@@ -1,11 +1,21 @@
 import React from 'react';
-import {useState, useEffect, useRef, ChangeEvent} from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useReducer,
+  Dispatch,
+  ChangeEvent,
+} from 'react';
 import {insertionSort, mergeSort} from '../utils/Sorters';
 import {BubbleSortState, bubbleSort} from '../utils/BubbleSort';
 import quickSort, {QuickSortState} from '../utils/Quicksort';
 import selectionSort, {SelectionSortState} from '../utils/SelectionSort';
 import {Graphic} from './Graphic';
 import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
+
+import sample from '../samples/handdrum-loop.mp3';
 
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import styled from 'styled-components';
@@ -38,19 +48,23 @@ interface InsertionSortState {
 }
 export type {InsertionSortState};
 
-type SorterStates = {
-  'Insertion Sort': {curr: number; next: number; done: boolean};
-  'Merge Sort': {width: number; left: number; done: boolean};
-  'Bubble Sort': {
-    curr: number;
-    prev: number;
-    swappedOnPrevPass: boolean;
-    swappedOnCurrentPass: boolean;
-    done: boolean;
-  };
+interface SorterStates {
+  'Insertion Sort': InsertionSortState;
+  'Merge Sort': MergeSortState;
+  'Bubble Sort': BubbleSortState;
   Quicksort: QuickSortState;
   'Selection Sort': SelectionSortState;
-};
+}
+type S = keyof SorterStates;
+
+// interface SorterStates {
+//   [name: string]:
+//     | InsertionSortState
+//     | MergeSortState
+//     | BubbleSortState
+//     | SelectionSortState
+//     | QuickSortState;
+// }
 
 type SorterState =
   | InsertionSortState
@@ -60,8 +74,9 @@ type SorterState =
   | SelectionSortState;
 
 type Action =
-  | {type: 'update'; name: string; newState: SorterState}
-  | {type: 'reset'};
+  | {type: 'update'; name: string; newState: SorterState; newArray: Block[]}
+  | {type: 'reset'; name: string; newArray: Block[]}
+  | {type: 'size'; newArray: Block[]};
 
 const Hero = styled(Jumbotron)`
   border-bottom-right-radius: 0rem;
@@ -76,27 +91,6 @@ function generateNewArray(size: number): Array<Block> {
   }
   return list;
 }
-
-// function getSorterFromName(
-//   name: string
-// ):
-//   | ((
-//       a: Block[],
-//       state: InsertionSortState
-//     ) => {array: Block[]; state: InsertionSortState})
-//   | ((
-//       a: Block[],
-//       state: MergeSortState
-//     ) => {array: Block[]; state: MergeSortState}) {
-//   switch (name) {
-//     case 'Insertion Sort':
-//       return insertionSort;
-//     case 'Merge Sort':
-//       return mergeSort;
-//     default:
-//       return insertionSort;
-//   }
-// }
 
 const initialSorterStates: SorterStates = {
   'Insertion Sort': {curr: 0, next: 1, done: false},
@@ -139,32 +133,56 @@ function resetSorterStates() {
   };
 }
 
-// function reducer(state: SorterStates, action: Action): SorterStates {
-//   switch (action.type) {
-//     case 'update':
-//       // console.log(state[action.name]);
-//       console.log({...state, [action.name]: action.newState});
-//       return {...state, [action.name]: {...action.newState}};
-//     case 'reset'
-//
-//       return {
-//         'Insertion Sort': {curr: 0, next: 1, done: false},
-//         'Merge Sort': {width: 1, left: 0, done: false},
-//       };
-//     default:
-//       return initialSorterStates;
-//   }
-// }
+function getSorterFromName(name: string) {
+  switch (name) {
+    case 'Insertion Sort':
+      return insertionSort;
+    case 'Merge Sort':
+      return mergeSort;
+    case 'Quicksort':
+      return quickSort;
+    case 'Selection Sort':
+      return selectionSort;
+    case 'Bubble Sort':
+      return bubbleSort;
+    default:
+      return insertionSort;
+  }
+}
+
+interface ReducerState extends SorterStates {
+  array: Block[];
+}
+
+function reducer(state: ReducerState, action: Action): ReducerState {
+  switch (action.type) {
+    case 'update':
+      return {
+        ...state,
+        array: action.newArray,
+        [action.name]: {...action.newState},
+      };
+    case 'reset':
+      return {
+        ...state,
+        array: action.newArray,
+        [action.name]: {...initialSorterStates[action.name as S]},
+      };
+    case 'size':
+      return {
+        ...state,
+        array: action.newArray,
+      };
+  }
+}
 
 function Visualizer() {
-  const [array, setArray] = useState(generateNewArray(25));
   const [size, setSize] = useState(25);
   const [userClickedSort, setUserClickedSort] = useState(false);
 
   const [speed, setSpeed] = useState(10);
   const [currentSorter, setSorter] = useState('Insertion Sort');
 
-  const speedRef = useRef(10);
   const sorterIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSliderChange = (
@@ -172,7 +190,6 @@ function Visualizer() {
     updater: Function
   ) => {
     updater(Number(e.target.value));
-    speedRef.current = speed;
   };
 
   const handleSortSelect = (sortName: string) => {
@@ -181,61 +198,31 @@ function Visualizer() {
   };
 
   const sorterStateRef = useRef({...initialSorterStates});
+  const init = {...initialSorterStates, array: generateNewArray(size)};
+  const [sorterStates, dispatch] = useReducer(reducer, init);
 
-  const resetAllAfterSort = () => {
+  const resetAllAfterSort = useCallback(() => {
     if (sorterIntervalRef.current) {
       clearInterval(sorterIntervalRef.current);
       setUserClickedSort(false);
-      // sortStatesDispatch({type: 'reset'});
       sorterStateRef.current = resetSorterStates();
     }
-  };
+  }, []);
 
   useEffect(() => {
-    console.log(userClickedSort);
-    console.log(sorterIntervalRef.current);
     if (!userClickedSort) {
       return;
     }
 
     sorterIntervalRef.current = setInterval(() => {
-      let resp;
-      if (currentSorter === 'Insertion Sort') {
-        resp = insertionSort(
-          array.slice(),
-          sorterStateRef.current['Insertion Sort']
-        );
-        sorterStateRef.current['Insertion Sort'] = {...resp.state};
-      } else if (currentSorter === 'Bubble Sort') {
-        resp = bubbleSort(array.slice(), sorterStateRef.current['Bubble Sort']);
-        sorterStateRef.current['Bubble Sort'] = {...resp.state};
-      } else if (currentSorter === 'Quicksort') {
-        if (sorterStateRef.current['Quicksort'].high === -1) {
-          resp = quickSort(array.slice(), {
-            ...sorterStateRef.current['Quicksort'],
-            high: array.length - 1,
-          });
-        } else {
-          resp = quickSort(array.slice(), sorterStateRef.current['Quicksort']);
-        }
-        sorterStateRef.current['Quicksort'] = {
-          ...resp.state,
-          stack: [...resp.state.stack],
-        };
-      } else if (currentSorter === 'Selection Sort') {
-        resp = selectionSort(
-          array.slice(),
-          sorterStateRef.current['Selection Sort']
-        );
-        sorterStateRef.current['Selection Sort'] = {...resp.state};
-      } else {
-        resp = mergeSort(array.slice(), sorterStateRef.current['Merge Sort']);
-        sorterStateRef.current['Merge Sort'] = {
-          ...resp.state,
-        };
-        console.log(sorterStateRef.current['Merge Sort']);
-      }
-      setArray(resp.array);
+      let sorter = getSorterFromName(currentSorter),
+        resp = sorter(sorterStates.array, sorterStates[currentSorter as S]);
+      dispatch({
+        type: 'update',
+        name: currentSorter,
+        newState: resp.state,
+        newArray: resp.array,
+      });
 
       if (resp.state.done) {
         resetAllAfterSort();
@@ -248,24 +235,29 @@ function Visualizer() {
         sorterIntervalRef.current = null;
       }
     };
-  }, [userClickedSort, speed]);
+  }, [sorterStates, userClickedSort, currentSorter, speed, resetAllAfterSort]);
 
   useEffect(() => {
     if (!userClickedSort) {
-      setArray(generateNewArray(size));
+      dispatch({type: 'size', newArray: generateNewArray(size)});
     }
   }, [size]);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     if (sorterIntervalRef.current != null) {
       clearInterval(sorterIntervalRef.current);
       sorterIntervalRef.current = null;
       sorterStateRef.current = {...initialSorterStates};
     }
 
-    setArray(generateNewArray(size));
+    dispatch({
+      type: 'reset',
+      name: currentSorter,
+      newArray: generateNewArray(size),
+    });
+
     setUserClickedSort(false);
-  };
+  }, [currentSorter, size]);
 
   return (
     <div id='visualizer'>
@@ -284,7 +276,6 @@ function Visualizer() {
             onChange={(e) => handleSliderChange(e, setSpeed)}
           />
           {'Size of array: '}
-          {/* <p className='text-nowrap'>Size of array: </p> */}
           <input
             className={'w-100 ml-3'}
             type='range'
@@ -305,7 +296,7 @@ function Visualizer() {
           handleClick={reset}
         />
       </Hero>
-      <Graphic array={array} />
+      <Graphic array={sorterStates.array} />
     </div>
   );
 }

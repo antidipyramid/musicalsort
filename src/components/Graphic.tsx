@@ -1,6 +1,7 @@
 import React, {ReactChildren, useEffect, useRef} from 'react';
 import type {Block} from './Visualizer';
 import {Container, SVG} from '@svgdotjs/svg.js';
+import * as Tone from 'tone';
 
 const colorMap = new Map<string, string>([
   ['sorted', 'blue'],
@@ -12,6 +13,8 @@ const colorMap = new Map<string, string>([
   ['presorted low', 'cyan'],
   ['presorted high', 'hotpink'],
 ]);
+
+const synth = new Tone.Synth().toDestination();
 
 function Graphic(props: {array: Array<Block>}) {
   const svgObject = useRef<Container | null>(null);
@@ -37,6 +40,7 @@ function Graphic(props: {array: Array<Block>}) {
         .attr({'stroke-width': 3, stroke: '#e9ecef', fill: 'none'});
     }
 
+    synth.triggerAttackRelease('C4', '8n');
     props.array.forEach((element, i) => {
       let [height, blockStatus] = [element.value, element.state];
       if (svgObject.current != null) {

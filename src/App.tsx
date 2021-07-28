@@ -23,10 +23,10 @@ const colorMap = new Map<string, string>([
 ]);
 
 function drawLegend() {
-  let legend = SVG().addTo('#legend').size(1110, 50),
+  const legend = SVG().addTo('#legend').size(1110, 50),
     textSettings = {size: '.9rem', weight: '800'};
 
-  let [rectWidth, rectHeight, offset] = [25, 25, 10];
+  const [rectWidth, rectHeight, offset] = [25, 25, 10];
 
   Array.from(colorMap.keys()).forEach((s, i) => {
     let group = legend.group();
@@ -122,9 +122,9 @@ function App() {
         </p>
         <p>
           {' '}
-          This project was inspired by the many videos online that accompany
-          sorting visualizations with sound. Some of the most well known
-          algorithms are included here, but{' '}
+          This app was inspired by the many videos online that pair sorting
+          visualizations with sound. Some of the most well known algorithms are
+          included here, but{' '}
           <a href='https://panthema.net/2013/sound-of-sorting/'>this</a> project
           is a great standalone app that includes more obscure sorting
           algorithms.
