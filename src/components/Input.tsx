@@ -52,7 +52,7 @@ function AlgorithmOptions(props: {className: string; handleClick: Function}) {
       />
       <SortOptionButton
         text='Merge Sort'
-        className='mr-3 w-100'
+        className='w-100'
         handleClick={props.handleClick}
       />
     </div>

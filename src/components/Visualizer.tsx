@@ -7,6 +7,9 @@ import selectionSort, {SelectionSortState} from '../utils/SelectionSort';
 import {Graphic} from './Graphic';
 import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
 
+import Jumbotron from 'react-bootstrap/Jumbotron';
+import styled from 'styled-components';
+
 interface Block {
   value: number;
   state:
@@ -59,6 +62,12 @@ type SorterState =
 type Action =
   | {type: 'update'; name: string; newState: SorterState}
   | {type: 'reset'};
+
+const Hero = styled(Jumbotron)`
+  border-bottom-right-radius: 0rem;
+  border-bottom-left-radius: 0rem;
+  padding: 2rem;
+`;
 
 function generateNewArray(size: number): Array<Block> {
   let list: Array<Block> = [];
@@ -156,7 +165,7 @@ function Visualizer() {
   const [currentSorter, setSorter] = useState('Insertion Sort');
 
   const speedRef = useRef(10);
-  const sorterIntervalRef = useRef<NodeJS.Timeout>();
+  const sorterIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSliderChange = (
     e: ChangeEvent<HTMLInputElement>,
@@ -179,11 +188,16 @@ function Visualizer() {
       setUserClickedSort(false);
       // sortStatesDispatch({type: 'reset'});
       sorterStateRef.current = resetSorterStates();
-      console.log(array);
     }
   };
 
   useEffect(() => {
+    console.log(userClickedSort);
+    console.log(sorterIntervalRef.current);
+    if (!userClickedSort) {
+      return;
+    }
+
     sorterIntervalRef.current = setInterval(() => {
       let resp;
       if (currentSorter === 'Insertion Sort') {
@@ -221,28 +235,31 @@ function Visualizer() {
         };
         console.log(sorterStateRef.current['Merge Sort']);
       }
-
-      // console.log(resp.state);
       setArray(resp.array);
-      // console.log(resp.array.map((x) => x.value));
 
       if (resp.state.done) {
         resetAllAfterSort();
       }
-      // sorterStateRef.current = resp.state;
-    }, speedRef.current);
+    }, speed);
 
     return () => {
-      if (sorterIntervalRef.current) {
+      if (sorterIntervalRef.current != null) {
         clearInterval(sorterIntervalRef.current);
-        setUserClickedSort(false);
+        sorterIntervalRef.current = null;
       }
     };
-  }, [userClickedSort]);
+  }, [userClickedSort, speed]);
+
+  useEffect(() => {
+    if (!userClickedSort) {
+      setArray(generateNewArray(size));
+    }
+  }, [size]);
 
   const reset = () => {
     if (sorterIntervalRef.current != null) {
       clearInterval(sorterIntervalRef.current);
+      sorterIntervalRef.current = null;
       sorterStateRef.current = {...initialSorterStates};
     }
 
@@ -252,37 +269,42 @@ function Visualizer() {
 
   return (
     <div id='visualizer'>
-      {/* <SoundOptions /> */}
-      {/* <SampleOptions className='mb-3' handleClick={setSortAlgorithm} /> */}
-      {'Speed: '}
-      <input
-        className={'w-100 ml-3'}
-        type='range'
-        value={speed}
-        step={1}
-        min={10}
-        max={500}
-        onChange={(e) => handleSliderChange(e, setSpeed)}
-      />
-      {'Size of array: '}
-      <input
-        className={'w-100 ml-3'}
-        type='range'
-        value={size}
-        step={1}
-        min={5}
-        max={100}
-        onChange={(e) => handleSliderChange(e, setSize)}
-      />
-      <AlgorithmOptions
-        className='d-flex mb-3'
-        handleClick={handleSortSelect}
-      />
-      <SortOptionButton
-        className='mb-3'
-        text='Make New Array'
-        handleClick={reset}
-      />
+      <Hero className='mb-0'>
+        {/* <SoundOptions /> */}
+        {/* <SampleOptions className='mb-3' handleClick={setSortAlgorithm} /> */}
+        <div className='d-flex align-items-center text-nowrap'>
+          {'Speed: '}
+          <input
+            className={'w-100 ml-3 mr-3'}
+            type='range'
+            value={speed}
+            step={1}
+            min={10}
+            max={500}
+            onChange={(e) => handleSliderChange(e, setSpeed)}
+          />
+          {'Size of array: '}
+          {/* <p className='text-nowrap'>Size of array: </p> */}
+          <input
+            className={'w-100 ml-3'}
+            type='range'
+            value={size}
+            step={1}
+            min={5}
+            max={100}
+            onChange={(e) => handleSliderChange(e, setSize)}
+          />
+        </div>
+        <AlgorithmOptions
+          className='d-flex mt-3 mb-3'
+          handleClick={handleSortSelect}
+        />
+        <SortOptionButton
+          className='btn-danger btn-block'
+          text='Make New Array'
+          handleClick={reset}
+        />
+      </Hero>
       <Graphic array={array} />
     </div>
   );
