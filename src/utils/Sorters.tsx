@@ -94,10 +94,11 @@ function mergeSort(
   let oldState = {...state};
   if (state.width < a.length) {
     if (state.left < a.length) {
-      let right = Math.min(state.left + (state.width * 2 - 1), a.length - 1),
-        mid = Math.floor((state.left + right) / 2);
+      let right = Math.min(state.left + (state.width * 2 - 1), a.length - 1);
 
-      if (state.width > Number((a.length / state.width).toFixed(0))) {
+      let mid = Math.floor((state.left + right) / 2);
+
+      if (state.width > Math.floor(a.length / 2)) {
         mid = right - (a.length % state.width);
       }
 
@@ -106,8 +107,8 @@ function mergeSort(
       return {
         array: a.slice(),
         state: {
-          width: oldState.width,
-          left: oldState.left + oldState.width * 2,
+          width: state.width,
+          left: state.left + state.width * 2,
           done: false,
         },
       };
@@ -135,6 +136,9 @@ function merge(a: Block[], left: number, mid: number, right: number) {
 
   tmpLeft.push(Number.MAX_SAFE_INTEGER);
   tmpRight.push(Number.MAX_SAFE_INTEGER);
+
+  console.log(left, mid, right);
+  console.log(tmpLeft, tmpRight);
 
   let [i, j] = [0, 0];
   for (let curr = left; curr <= right; curr++) {

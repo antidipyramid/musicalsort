@@ -95,6 +95,16 @@ function partition(a: Block[], state: any) {
 }
 
 function quickSort(a: Block[], state: any) {
+  if (state.high === -1) {
+    return {
+      array: a,
+      state: {
+        ...state,
+        high: a.length - 1,
+      },
+    };
+  }
+
   if (state.partitioning) {
     return partition(a, state);
   }

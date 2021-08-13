@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import {
   useState,
@@ -14,6 +15,8 @@ import quickSort, {QuickSortState} from '../utils/Quicksort';
 import selectionSort, {SelectionSortState} from '../utils/SelectionSort';
 import {Graphic} from './Graphic';
 import {SampleOptions, AlgorithmOptions, SortOptionButton} from './Input';
+
+import * as Tone from 'tone';
 
 import sample from '../samples/handdrum-loop.mp3';
 
@@ -57,15 +60,6 @@ interface SorterStates {
 }
 type S = keyof SorterStates;
 
-// interface SorterStates {
-//   [name: string]:
-//     | InsertionSortState
-//     | MergeSortState
-//     | BubbleSortState
-//     | SelectionSortState
-//     | QuickSortState;
-// }
-
 type SorterState =
   | InsertionSortState
   | MergeSortState
@@ -87,7 +81,7 @@ const Hero = styled(Jumbotron)`
 function generateNewArray(size: number): Array<Block> {
   let list: Array<Block> = [];
   for (let i = 0; i < size; i++) {
-    list.push({value: Math.random() * 300 + 1, state: 'unsorted'});
+    list.push({value: Math.random() * (850 - 500) + 500, state: 'unsorted'});
   }
   return list;
 }
@@ -176,6 +170,16 @@ function reducer(state: ReducerState, action: Action): ReducerState {
   }
 }
 
+const synth = new Tone.PolySynth(Tone.Synth, {
+  envelope: {
+    release: 0,
+  },
+  oscillator: {
+    type: 'sine',
+  },
+}).toDestination();
+// synth.triggerAttackRelease(['c4', 'e4', 'a4'], 1);
+
 function Visualizer() {
   const [size, setSize] = useState(25);
   const [userClickedSort, setUserClickedSort] = useState(false);
@@ -198,7 +202,7 @@ function Visualizer() {
   };
 
   const sorterStateRef = useRef({...initialSorterStates});
-  const init = {...initialSorterStates, array: generateNewArray(size)};
+  const init = {...initialSorterStates, array: []};
   const [sorterStates, dispatch] = useReducer(reducer, init);
 
   const resetAllAfterSort = useCallback(() => {
@@ -214,9 +218,25 @@ function Visualizer() {
       return;
     }
 
+    let sorter = getSorterFromName(currentSorter);
     sorterIntervalRef.current = setInterval(() => {
-      let sorter = getSorterFromName(currentSorter),
-        resp = sorter(sorterStates.array, sorterStates[currentSorter as S]);
+      let resp = sorter(sorterStates.array, sorterStates[currentSorter as S]);
+      console.log(
+        resp.array.map((x) => x.value),
+        resp.state
+      );
+      // synth.triggerAttack('c4');
+
+      let freqsToPlay = resp.array
+        .filter((b) => b.state === 'considering' || b.state === 'minimum')
+        .map((b) => b.value);
+
+      synth.releaseAll();
+      synth.triggerAttackRelease(
+        freqsToPlay,
+        freqsToPlay.map((f) => 0.1)
+      );
+
       dispatch({
         type: 'update',
         name: currentSorter,
@@ -225,6 +245,7 @@ function Visualizer() {
       });
 
       if (resp.state.done) {
+        // synth.triggerRelease();
         resetAllAfterSort();
       }
     }, speed);
@@ -256,6 +277,7 @@ function Visualizer() {
       newArray: generateNewArray(size),
     });
 
+    // synth.triggerRelease();
     setUserClickedSort(false);
   }, [currentSorter, size]);
 
@@ -271,7 +293,7 @@ function Visualizer() {
             type='range'
             value={speed}
             step={1}
-            min={10}
+            min={1}
             max={500}
             onChange={(e) => handleSliderChange(e, setSpeed)}
           />

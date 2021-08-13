@@ -14,8 +14,6 @@ const colorMap = new Map<string, string>([
   ['presorted high', 'hotpink'],
 ]);
 
-const synth = new Tone.Synth().toDestination();
-
 function Graphic(props: {array: Array<Block>}) {
   const svgObject = useRef<Container | null>(null);
   const svg = useRef<HTMLDivElement>(null);
@@ -40,23 +38,22 @@ function Graphic(props: {array: Array<Block>}) {
         .attr({'stroke-width': 3, stroke: '#e9ecef', fill: 'none'});
     }
 
-    synth.triggerAttackRelease('C4', '8n');
-    props.array.forEach((element, i) => {
-      let [height, blockStatus] = [element.value, element.state];
+    for (let i = 0; i < props.array.length; i++) {
+      let [height, blockStatus] = [props.array[i].value, props.array[i].state];
       if (svgObject.current != null) {
         if (i > 0) {
           svgObject.current
-            .rect(blockWidth, height)
+            .rect(blockWidth, height - 500)
             .attr({fill: colorMap.get(blockStatus)})
             .move((blockWidth + offset) * i + offset, 0);
         } else {
           svgObject.current
-            .rect(blockWidth, height)
+            .rect(blockWidth, height - 500)
             .attr({fill: colorMap.get(blockStatus)})
             .move(offset, 0);
         }
       }
-    });
+    }
   });
 
   return <div id='graphic' ref={svg}></div>;

@@ -22,79 +22,43 @@ const colorMap = new Map<string, string>([
   ['presorted high', 'hotpink'],
 ]);
 
+function titleCase(s: string) {
+  let done = [];
+  for (let word of s.split(' ')) {
+    done.push(word[0].toUpperCase().concat(word.slice(1)));
+  }
+
+  return done.join(' ');
+}
+
 function drawLegend() {
   const legend = SVG().addTo('#legend').size(1110, 50),
     textSettings = {size: '.9rem', weight: '800'};
 
-  const [rectWidth, rectHeight, offset] = [25, 25, 10];
+  const [rectWidth, rectHeight, offset] = [25, 25, 25];
 
+  let textWidth = 0;
   Array.from(colorMap.keys()).forEach((s, i) => {
     let group = legend.group();
+
     group
       .rect(rectWidth, rectHeight)
       .fill(String(colorMap.get(s)))
-      .move((90 + 30) * i, 0);
+      .move((rectWidth + 5) * i + textWidth + offset * i, 0);
+    let text = group.text(titleCase(s)).font(textSettings);
+
+    textWidth += text.length();
+
     group
-      .text(s)
-      .font(textSettings)
-      .move((90 + 30) * i + 30, 0);
+      .get(1)
+      .move(
+        (rectWidth + 5) * (i + 1) + textWidth - text.length() + offset * i,
+        0
+      );
   });
 }
 
 function App() {
-  const onSampleLoad = () => {
-    // if (!player.loaded) {
-    //   console.error('Buffer not loaded yet!');
-    //   return;
-    // }
-    //     if (player.state == 'started') {
-    //       player.stop();
-    //     } else {
-    //       for (const time of times) {
-    //         player.stop();
-    //         player.seek(time);
-    //         player.start();
-    //         player.stop('+1');
-    //         sleep(1000);
-    //       }
-    //     }
-  };
-
-  // const player = new Tone.Player(
-  //   'https://tonejs.github.io/audio/drum-samples/loops/ominous.mp3'
-  // ).toDestination();
-
-  // const play = () =>
-  //   Tone.Transport.scheduleOnce(() => {
-  //     console.log('started!');
-  //     player.seek(1);
-  //     player.start();
-  //     player.stop('+1');
-  //   }, 1);
-  // const [start, setStart] = useState(0);
-  // const grainSize = 0.05;
-
-  // // player.start();
-  // // player.toDestination();
-  // player.start();
-  // player.toDestination();
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setStart(Number(Math.random().toFixed(2)));
-  //     player.set({
-  //       grainSize: grainSize,
-  //       loopStart: start,
-  //       loopEnd: start + grainSize,
-  //     });
-
-  //     if (player.loaded) {
-  //       player.restart();
-  //     }
-  //   }, 5000);
-  // });
-
-  // const filter = new Tone.AutoFilter(4).start();
-  // const distortion = new Tone.Distortion(0.5);
   useEffect(() => {
     drawLegend();
   });
