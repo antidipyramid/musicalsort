@@ -183,6 +183,10 @@ const synth = new Tone.PolySynth(Tone.Synth, {
 function Visualizer() {
   const [size, setSize] = useState(25);
   const [userClickedSort, setUserClickedSort] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
   const [speed, setSpeed] = useState(10);
   const [currentSorter, setSorter] = useState('Insertion Sort');
@@ -214,6 +218,16 @@ function Visualizer() {
   }, []);
 
   useEffect(() => {
+    function handleResize() {
+      setWindowSize({width: window.innerWidth, height: window.innerHeight});
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  });
+
+  useEffect(() => {
     if (!userClickedSort) {
       return;
     }
@@ -225,7 +239,6 @@ function Visualizer() {
         resp.array.map((x) => x.value),
         resp.state
       );
-      // synth.triggerAttack('c4');
 
       let freqsToPlay = resp.array
         .filter((b) => b.state === 'considering' || b.state === 'minimum')
@@ -277,7 +290,6 @@ function Visualizer() {
       newArray: generateNewArray(size),
     });
 
-    // synth.triggerRelease();
     setUserClickedSort(false);
   }, [currentSorter, size]);
 
@@ -309,7 +321,7 @@ function Visualizer() {
           />
         </div>
         <AlgorithmOptions
-          className='d-flex mt-3 mb-3'
+          className='row justify-content-center mt-3 mb-3'
           handleClick={handleSortSelect}
         />
         <SortOptionButton

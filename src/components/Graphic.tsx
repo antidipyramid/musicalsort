@@ -18,24 +18,42 @@ function Graphic(props: {array: Array<Block>}) {
   const svgObject = useRef<Container | null>(null);
   const svg = useRef<HTMLDivElement>(null);
 
-  let [svgWidth, svgHeight, offset] = [1110, 350, 5];
-  let blockWidth =
-    (svgWidth - (props.array.length + 1) * offset) / props.array.length;
-
   useEffect(() => {
+    let [svgWidth, svgHeight, offset] = [1110, 350, 5];
+
+    if (svg.current != null) {
+      [svgWidth, svgHeight] = [
+        svg.current.clientWidth,
+        svg.current.clientHeight,
+      ];
+    }
+
+    let blockWidth;
     if (svgObject.current == null) {
       if (svg.current != null) {
-        svgObject.current = SVG().addTo('#graphic').size(svgWidth, svgHeight);
+        svgObject.current = SVG().addTo('#graphic').size('100%', '100%');
         svgObject.current.css('transform', 'scale(1,-1)');
         svgObject.current
-          .rect(svgWidth, svgHeight)
+          .rect(
+            Number(svgObject.current.width()),
+            Number(svgObject.current.height())
+          )
           .attr({'stroke-width': 1, stroke: '#e9ecef', fill: 'none'});
+
+        svgObject.current.id('svg-graphic');
       }
+      blockWidth =
+        (svgWidth - (props.array.length + 1) * offset) / props.array.length;
     } else {
       svgObject.current.clear();
-      svgObject.current
-        .rect(svgWidth, svgHeight)
-        .attr({'stroke-width': 3, stroke: '#e9ecef', fill: 'none'});
+      svgObject.current.rect(svgWidth, svgHeight).attr({
+        'stroke-width': 3,
+        stroke: '#e9ecef',
+        fill: 'none',
+        preserveAspectRatio: 'xMinYMin',
+      });
+      blockWidth =
+        (svgWidth - (props.array.length + 1) * offset) / props.array.length;
     }
 
     for (let i = 0; i < props.array.length; i++) {

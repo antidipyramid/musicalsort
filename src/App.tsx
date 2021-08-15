@@ -60,19 +60,19 @@ function drawLegend() {
 
 function App() {
   useEffect(() => {
-    drawLegend();
+    // drawLegend();
   });
 
   return (
     <div
       className='container mt-3'
-      style={{paddingBottom: '20px', paddingTop: '20px'}}
+      style={{paddingBottom: '10vw', paddingTop: '10vw'}}
     >
       <div
         className='text-center'
         style={{
-          paddingLeft: '80px',
-          paddingRight: '80px',
+          paddingLeft: '5vw',
+          paddingRight: '5vw',
           paddingBottom: '20px',
         }}
       >
@@ -94,13 +94,15 @@ function App() {
           algorithms.
         </p>
       </div>
-      <Visualizer />
-      <Jumbotron
-        id='legend'
-        style={{borderTopRightRadius: '0rem', borderTopLeftRadius: '0rem'}}
-      />
-      <div style={{padding: '0px'}}>
-        Made with React, SVG.js, and Tone.js. Check out the code on Github.
+      <div>
+        <Visualizer />
+        {/* <Jumbotron */}
+        {/*   id='legend' */}
+        {/*   style={{borderTopRightRadius: '0rem', borderTopLeftRadius: '0rem'}} */}
+        {/* /> */}
+        <div style={{padding: '0px'}}>
+          Made with React, SVG.js, and Tone.js. Check out the code on Github.
+        </div>
       </div>
     </div>
   );

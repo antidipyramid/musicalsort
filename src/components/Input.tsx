@@ -32,27 +32,27 @@ function AlgorithmOptions(props: {className: string; handleClick: Function}) {
     <div className={props.className}>
       <SortOptionButton
         text='Insertion Sort'
-        className='mr-3 w-100'
+        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
         handleClick={props.handleClick}
       />
       <SortOptionButton
         text='Bubble Sort'
-        className='mr-3 w-100'
+        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
         handleClick={props.handleClick}
       />
       <SortOptionButton
         text='Quicksort'
-        className='mr-3 w-100'
+        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
         handleClick={props.handleClick}
       />
       <SortOptionButton
         text='Selection Sort'
-        className='mr-3 w-100'
+        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
         handleClick={props.handleClick}
       />
       <SortOptionButton
         text='Merge Sort'
-        className='w-100'
+        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
         handleClick={props.handleClick}
       />
     </div>
