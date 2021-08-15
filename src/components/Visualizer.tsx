@@ -6,6 +6,7 @@ import {
   useRef,
   useCallback,
   useReducer,
+  useLayoutEffect,
   Dispatch,
   ChangeEvent,
 } from 'react';
@@ -227,7 +228,7 @@ function Visualizer() {
     return () => window.removeEventListener('resize', handleResize);
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!userClickedSort) {
       return;
     }
