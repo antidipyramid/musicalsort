@@ -30,31 +30,41 @@ export {SortOptionsPanel};
 function AlgorithmOptions(props: {className: string; handleClick: Function}) {
   return (
     <div className={props.className}>
-      <SortOptionButton
-        text='Insertion Sort'
-        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
-        handleClick={props.handleClick}
-      />
-      <SortOptionButton
-        text='Bubble Sort'
-        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
-        handleClick={props.handleClick}
-      />
-      <SortOptionButton
-        text='Quicksort'
-        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
-        handleClick={props.handleClick}
-      />
-      <SortOptionButton
-        text='Selection Sort'
-        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
-        handleClick={props.handleClick}
-      />
-      <SortOptionButton
-        text='Merge Sort'
-        className='mr-3 w-100 text-nowrap col-md-3 col-sm-4 col-lg'
-        handleClick={props.handleClick}
-      />
+      <div className='col-md-4 col-sm-6 col-xl mt-3'>
+        <SortOptionButton
+          text='Insertion Sort'
+          className='mr-3 w-100 text-nowrap '
+          handleClick={props.handleClick}
+        />
+      </div>
+      <div className='col-md-4 col-sm-6 col-xl mt-3'>
+        <SortOptionButton
+          text='Bubble Sort'
+          className='mr-3 w-100 text-nowrap '
+          handleClick={props.handleClick}
+        />
+      </div>
+      <div className='col-md-4 col-sm-6 col-xl mt-3'>
+        <SortOptionButton
+          text='Quicksort'
+          className='mr-3 w-100 text-nowrap '
+          handleClick={props.handleClick}
+        />
+      </div>
+      <div className='col-md-4 col-sm-6 col-xl mt-3'>
+        <SortOptionButton
+          text='Selection Sort'
+          className='mr-3 w-100 text-nowrap '
+          handleClick={props.handleClick}
+        />
+      </div>
+      <div className='col-md-4 col-sm-6 col-xl mt-3'>
+        <SortOptionButton
+          text='Merge Sort'
+          className='mr-3 w-100 text-nowrap '
+          handleClick={props.handleClick}
+        />
+      </div>
     </div>
   );
 }
