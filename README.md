@@ -1,6 +1,6 @@
 # Musical Sort
 A single page React application that both visualizes and creates audio representations of several sorting algorithms.
-![Screenshot](images/musical_sort_screenshot.png)
+![Screenshot](images/screenshot.png)
 
 # Table of Contents
 * Motivation
