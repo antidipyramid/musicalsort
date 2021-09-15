@@ -12,6 +12,7 @@ There are a many great videos on YouTube that approximate what sorting algorithm
 
 # Technologies
 * The entire front-end is written in React
+* The backend is in Node.js and Express
 * The sorting algorithms are in Typescript
 * The sound is generated using the Tone.js library
 
