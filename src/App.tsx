@@ -4,7 +4,6 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import styled from 'styled-components';
-import './App.css';
 import Visualizer from './components/Visualizer';
 import Legend from './components/Legend';
 import * as Tone from 'tone';
