@@ -12,38 +12,7 @@ import * as Tone from 'tone';
 import {SVG} from '@svgdotjs/svg.js';
 import {Container as svgContainer} from '@svgdotjs/svg.js';
 
-// function drawSVGLegend() {
-//   const legend = SVG().addTo('#legend').size(1110, 50),
-//     textSettings = {size: '.9rem', weight: '800'};
-
-//   const [rectWidth, rectHeight, offset] = [25, 25, 25];
-
-//   let textWidth = 0;
-//   Array.from(colorMap.keys()).forEach((s, i) => {
-//     let group = legend.group();
-
-//     group
-//       .rect(rectWidth, rectHeight)
-//       .fill(String(colorMap.get(s)))
-//       .move((rectWidth + 5) * i + textWidth + offset * i, 0);
-//     let text = group.text(titleCase(s)).font(textSettings);
-
-//     textWidth += text.length();
-
-//     group
-//       .get(1)
-//       .move(
-//         (rectWidth + 5) * (i + 1) + textWidth - text.length() + offset * i,
-//         0
-//       );
-//   });
-// }
-
 function App() {
-  useEffect(() => {
-    // drawLegend();
-  });
-
   return (
     <div
       className='container mt-3'
